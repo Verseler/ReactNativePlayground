@@ -1,14 +1,13 @@
 import React from "react";
-import { SafeAreaView, StatusBar } from "react-native";
+import { SafeAreaView, View, StatusBar } from "react-native";
 import WelcomeScreen from "./components/WelcomeScreen";
 import TestExpoFeat from "./components/TestExpoFeat";
+import TestNavigation from "./components/TestNavigation";
 
 export default function App() {
   return (
-    <SafeAreaView
-      style={{ paddingTop: StatusBar.currentHeight }}
-    >
-      <TestExpoFeat />
-    </SafeAreaView>
+    <View>
+      <TestNavigation />
+    </View>
   );
 }
