@@ -3,11 +3,13 @@ import { SafeAreaView, View, StatusBar } from "react-native";
 import WelcomeScreen from "./components/WelcomeScreen";
 import TestExpoFeat from "./components/TestExpoFeat";
 import TestNavigation from "./components/TestNavigation";
+import TestBottonNavigation from "./components/TestBottomNavigation";
+import { NavigationContainer } from "@react-navigation/native";
 
 export default function App() {
   return (
-    <View>
-      <TestNavigation />
-    </View>
+    <NavigationContainer>
+      <TestBottonNavigation />
+      </NavigationContainer>
   );
 }
