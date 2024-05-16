@@ -1,144 +1,57 @@
-import React from "react";
-import { SafeAreaView, View, StatusBar } from "react-native";
-import WelcomeScreen from "./components/WelcomeScreen";
-import TestExpoFeat from "./components/TestExpoFeat";
-import TestNavigation from "./components/TestNavigation";
-import TestBottonNavigation from "./components/TestBottomNavigation";
-import { NavigationContainer } from "@react-navigation/native";
-import TempApp from "./components/reactnativeelements/TempApp";
-import DataVisualization from "./components/reactnativeelements/DataVisualization";
+import { View, Text } from "react-native";
+import React, { useState, useEffect } from "react";
+import { ProgressBar, MD3Colors, Button } from "react-native-paper";
+import * as ScreenOrientation from "expo-screen-orientation";
+import { Accelerometer } from "expo-sensors";
 
-import {
-  PaperProvider,
-  Appbar,
-  BottomNavigation,
-  Text,
-  Button,
-  Chip,
-  Dialog,
-  Portal,
-  FAB,
-} from "react-native-paper";
 
-export default function App() {
-  const MORE_ICON = Platform.OS === "ios" ? "dots-horizontal" : "dots-vertical";
-  const [index, setIndex] = React.useState(0);
-  const [visible, setVisible] = React.useState(false);
-  const [routes] = React.useState([
-    {
-      key: "music",
-      title: "Favorites",
-      focusedIcon: "heart",
-      unfocusedIcon: "heart-outline",
-    },
-    { key: "albums", title: "Albums", focusedIcon: "album" },
-    { key: "recents", title: "Recents", focusedIcon: "history" },
-    {
-      key: "notifications",
-      title: "Notifications",
-      focusedIcon: "bell",
-      unfocusedIcon: "bell-outline",
-    },
-  ]);
-  const [state, setState] = React.useState({ open: false });
+function App() {
+  const [data, setData] = useState(0.5);
 
-  const onStateChange = ({ open }) => setState({ open });
 
-  const { open } = state;
+  useEffect(() => {
+    const subscription = Accelerometer.addListener((dat) => {
+      const filteredZ = lowPassFilter(dat.z, data);
+      console.log(filteredZ)
+      setData(filteredZ);
+    });
 
-  const showDialog = () => setVisible(true);
+    return () => subscription.remove();
+  }, []);
 
-  const hideDialog = () => setVisible(false);
+  
+  useEffect(() => {
+    ScreenOrientation.lockAsync(
+      ScreenOrientation.OrientationLock.LANDSCAPE_LEFT
+    );
+  }, [])
 
-  const renderScene = BottomNavigation.SceneMap({
-    music: MusicRoute,
-    albums: AlbumsRoute,
-    recents: RecentsRoute,
-    notifications: NotificationsRoute,
-  });
+
+  const lowPassFilter = (currentValue, previousValue) => {
+    const dt = 1.0 / 50.0;
+    const RC = 0.15;
+    const alpha = dt / (RC + dt);
+
+    return alpha * currentValue + (1.0 - alpha) * previousValue;
+  };
+
+
+  async function changeScreenOrientation() {
+    await ScreenOrientation.lockAsync(
+      ScreenOrientation.OrientationLock.LANDSCAPE_LEFT
+    );
+  }
 
   return (
-    <PaperProvider>
-      <View style={{ flex: 1 }}>
-        <Appbar.Header>
-          <Appbar.Content title="Title" />
-          <Appbar.Action icon="magnify" onPress={() => {}} />
-          <Appbar.Action icon={MORE_ICON} onPress={() => {}} />
-        </Appbar.Header>
-        <Button
-          icon="camera"
-          mode="contained"
-          onPress={() => console.log("Pressed")}
-        >
-          Press me
-        </Button>
-        <Chip icon="information" onPress={() => console.log("Pressed")}>
-          Example Chip
-        </Chip>
-        <View>
-          <Button onPress={showDialog}>Show Dialog</Button>
-          <Portal>
-            <Dialog visible={visible} onDismiss={hideDialog}>
-              <Dialog.Title>Alert</Dialog.Title>
-              <Dialog.Content>
-                <Text variant="bodyMedium">This is simple dialog</Text>
-              </Dialog.Content>
-              <Dialog.Actions>
-                <Button onPress={hideDialog}>Done</Button>
-              </Dialog.Actions>
-            </Dialog>
-          </Portal>
-
-          <Portal>
-          <FAB.Group
-          
-            open={open}
-            visible
-            icon={open ? "calendar-today" : "plus"}
-            actions={[
-              { icon: "plus", onPress: () => console.log("Pressed add") },
-              {
-                icon: "star",
-                label: "Star",
-                onPress: () => console.log("Pressed star"),
-              },
-              {
-                icon: "email",
-                label: "Email",
-                onPress: () => console.log("Pressed email"),
-              },
-              {
-                icon: "bell",
-                label: "Remind",
-                onPress: () => console.log("Pressed notifications"),
-              },
-            ]}
-            onStateChange={onStateChange}
-            onPress={() => {
-              if (open) {
-                // do something if the speed dial is open
-              }
-            }}
-          />
-        </Portal>
-        </View>
-
-
-
-        <BottomNavigation
-          navigationState={{ index, routes }}
-          onIndexChange={setIndex}
-          renderScene={renderScene}
-        />
-      </View>
-    </PaperProvider>
+    <View style={{ flex: 1, paddingTop: 100, backgroundColor: "skyblue" }}>
+      <ProgressBar
+        style={{ height: 30, borderWidth: 1, transform: [{ rotate: "90deg" }] }}
+        progress={data}
+        anim
+        color={MD3Colors.error50}
+      />
+    </View>
   );
 }
 
-const MusicRoute = () => <Text>Music</Text>;
-
-const AlbumsRoute = () => <Text>Albums</Text>;
-
-const RecentsRoute = () => <Text>Recents</Text>;
-
-const NotificationsRoute = () => <Text>Notifications</Text>;
+export default App;
