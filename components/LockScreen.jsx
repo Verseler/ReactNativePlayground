@@ -15,7 +15,7 @@ const LockScreen = ({ onUnlock }) => {
 const styles = StyleSheet.create({
   overlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0, 0, 0, 0.1)",
+    backgroundColor: "rgba(0, 0, 0, 0.1w)",
     justifyContent: "center",
     alignItems: "center",
   },
